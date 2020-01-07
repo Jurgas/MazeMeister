@@ -18,10 +18,10 @@ public class RequestHandler {
         return response(client, request);
     }
 
-    public Object[] move(String uid, String map, String des) {
+    public Object[] move(String uid, String map, Direction direction) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create("http://tesla.iem.pw.edu.pl:4444/" + uid + "/" + map + "/move/" + des))
+                .uri(URI.create("http://tesla.iem.pw.edu.pl:4444/" + uid + "/" + map + "/move/" + direction.toString().toLowerCase()))
                 .POST(HttpRequest.BodyPublishers.ofString(""))
                 .build();
 

@@ -11,18 +11,26 @@ public class Room {
         this.visited = visited;
     }
 
-    public void setConnection(char direction, Room neighbour) {
+    public Room[] getConnections() {
+        return connections;
+    }
+
+    public boolean isVisited() {
+        return visited;
+    }
+
+    public void setConnection(Direction direction, Room neighbour) {
         switch (direction) {
-            case 'u':
+            case UP:
                 this.connections[0] = neighbour;
                 break;
-            case 'r':
+            case RIGHT:
                 this.connections[1] = neighbour;
                 break;
-            case 'd':
+            case DOWN:
                 this.connections[2] = neighbour;
                 break;
-            case 'l':
+            case LEFT:
                 this.connections[3] = neighbour;
                 break;
         }
