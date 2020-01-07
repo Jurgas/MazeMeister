@@ -1,10 +1,14 @@
 public class Room {
-    private Room[] connections;
+    private Room[] connections = new Room[4];
     private boolean visited;
     private int availableDirections;
 
     public Room() {
         this.visited = false;
+    }
+
+    public void setVisited(boolean visited) {
+        this.visited = visited;
     }
 
     public void setConnection(char direction, Room neighbour) {

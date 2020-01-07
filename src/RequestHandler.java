@@ -94,8 +94,13 @@ public class RequestHandler {
 
     public static void main(String[] args) {
         RequestHandler r = new RequestHandler();
-        r.getPoss("bd5f6f92", "1");
-        r.move("bd5f6f92", "1", "left");
-        r.getPoss("bd5f6f92", "1");
+        r.reset("bd5f6f92", "1");
+//        r.getPoss("bd5f6f92", "1");
+//        r.move("bd5f6f92", "1", "left");
+//        r.getPoss("bd5f6f92", "1");
+//        Object object = r.startPoss("bd5f6f92", "1");
+//        Object object = r.getPoss("bd5f6f92", "1");
+//        System.out.println("hello");
+//        r.reset("bd5f6f92", "1");
     }
 }
