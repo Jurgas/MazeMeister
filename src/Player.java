@@ -1,8 +1,6 @@
 import org.json.JSONObject;
 
-import javax.swing.plaf.DimensionUIResource;
 import java.util.ArrayList;
-import java.util.List;
 
 
 public class Player {
@@ -83,8 +81,6 @@ public class Player {
         if (this.unvisitedNeighbours > 0) {
             if (this.unvisitedNeighbours > 1) {
                 this.unexplored.add(this.currentRoom);
-            } else if (unexplored != null && unexplored.contains(currentRoom)) {
-                unexplored.remove(currentRoom);
             }
 
             for (int i = 0; i < 4; i++) {
@@ -94,64 +90,49 @@ public class Player {
                     break;
                 }
             }
-        } else if (!unexplored.isEmpty()) {
+        } else if (updateUnexploredList() > 0) {
             BFSAlgorithm bfsAlgorithm = new BFSAlgorithm();
             bfsAlgorithm.solve(currentRoom, unexplored).forEach(this::move);
             checkUnvisitedNeighbours();
         }
     }
 
-    private void checkIfNeighboursUnexplored() {
-        for (int i = 0; i < 4; i++) {
-            if (this.currentRoom.getConnections()[i] != null) {
-
-            }
-        }
-    }
-
     public void move(Direction direction) {
-        int previousRoomDirection = -1;
         switch (direction) {
             case UP:
                 this.currentPosition[1]--;
-                previousRoomDirection = 2;
                 break;
             case RIGHT:
                 this.currentPosition[0]++;
-                previousRoomDirection = 3;
                 break;
             case DOWN:
                 this.currentPosition[1]++;
-                previousRoomDirection = 0;
                 break;
             case LEFT:
                 this.currentPosition[0]--;
-                previousRoomDirection = 1;
                 break;
         }
         System.out.println(direction);
         this.requestHandler.move(this.uid, this.map, direction);
         this.currentRoom = this.mappedMaze[this.currentPosition[1]][this.currentPosition[0]];
-        if (!this.currentRoom.isVisited()) {
-            int unvisitedCounter = -1;
-            this.currentRoom.setVisited(true);
-            for (int i = 0; i < 4; i++) {
-                if (this.currentRoom.getConnections()[i] != null) {
-                    for (int j = 0; j < 4; j++) {
-                        if (this.currentRoom.getConnections()[i].getConnections()[j] != null) {
-                            unvisitedCounter = 0;
-                            if (!this.currentRoom.getConnections()[i].getConnections()[j].isVisited()) {
-                                unvisitedCounter++;
-                            }
-                        }
-                    }
-                }
-                if (unvisitedCounter == 0) {
-                    unexplored.remove(this.currentRoom.getConnections()[i]);
+        this.currentRoom.setVisited(true);
+    }
+
+    public int updateUnexploredList() {
+        int unvisitedNeighboursCounter;
+        for (int i = 0; i < this.unexplored.size(); i++) {
+            unvisitedNeighboursCounter = 0;
+            for (int j = 0; j < 4; j++) {
+                if (this.unexplored.get(i).getConnections()[j] != null && !this.unexplored.get(i).getConnections()[j].isVisited()) {
+                    unvisitedNeighboursCounter++;
                 }
             }
-            checkIfNeighboursUnexplored();
+            if (unvisitedNeighboursCounter == 0) {
+                this.unexplored.remove(i);
+                i--;
+            }
         }
+        return this.unexplored.size();
     }
 
     public void fillCurrentRoomNeighbours() {
@@ -207,7 +188,7 @@ public class Player {
 
     public static void main(String[] args) {
         String uid = "bd5f6f92";
-        String mapID = "3";
+        String mapID = "4";
         RequestHandler requestHandlerReset = new RequestHandler();
         requestHandlerReset.reset(uid, mapID);
         Player player = new Player();
@@ -224,6 +205,7 @@ public class Player {
         }
         System.out.println("Liczba krokow: " + requestHandlerReset.moves(uid, mapID)[1]);
         System.out.println("elo");
+        System.out.println(i);
     }
 
 }

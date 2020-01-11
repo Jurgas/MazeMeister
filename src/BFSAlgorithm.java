@@ -25,7 +25,22 @@ public class BFSAlgorithm {
         return finalRooms.contains(currentRoom);
     }
 
+    private int directionToParentIndex(Direction direction) {
+        switch (direction) {
+            case UP:
+                return 2;
+            case RIGHT:
+                return 3;
+            case DOWN:
+                return 0;
+            case LEFT:
+                return 1;
+        }
+        return -1;
+    }
+
     public ArrayList<Direction> solve(Room startingRoom, List<Room> finalRooms) {
+        System.out.println(finalRooms.toString());
         ArrayList<Direction> answer;
         boolean solved = false;
         BFSRoom removed = null;
@@ -35,7 +50,7 @@ public class BFSAlgorithm {
             System.out.println("Działam sobie dzałam...");
             removed = queue.remove();
             for (int i = 0; i < 4; i++) {
-                if (removed.room.getConnections()[i] != null) {
+                if (removed.room.getConnections()[i] != null && (removed.previousDirections.isEmpty() || i != directionToParentIndex(removed.previousDirections.get(removed.previousDirections.size() - 1)))) {
                     direction = Player.indexToDirection(i);
                     if (checkIfFinal(removed.room.getConnections()[i], finalRooms)) {
                         solved = true;
