@@ -1,6 +1,7 @@
 import org.json.JSONObject;
 
 import javax.swing.plaf.DimensionUIResource;
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -13,7 +14,7 @@ public class Player {
     private int[] currentPosition = new int[2];
     private int unvisitedNeighbours;
     private Room currentRoom;
-    private List<Room> unexplored;
+    private ArrayList<Room> unexplored = new ArrayList<>();
 
 
     public Player setMap(String map) {
@@ -64,56 +65,93 @@ public class Player {
         this.currentRoom = this.mappedMaze[this.currentPosition[1]][this.currentPosition[0]];
     }
 
+    public static Direction indexToDirection(int index) {
+        switch (index) {
+            case 0:
+                return Direction.UP;
+            case 1:
+                return Direction.RIGHT;
+            case 2:
+                return Direction.DOWN;
+            case 3:
+                return Direction.LEFT;
+        }
+        return null;
+    }
+
     public void calculateNextMove() {
-        Direction direction = null;
         if (this.unvisitedNeighbours > 0) {
             if (this.unvisitedNeighbours > 1) {
                 this.unexplored.add(this.currentRoom);
+            } else if (unexplored != null && unexplored.contains(currentRoom)) {
+                unexplored.remove(currentRoom);
             }
+
             for (int i = 0; i < 4; i++) {
                 if (this.currentRoom.getConnections()[i] != null && !this.currentRoom.getConnections()[i].isVisited()) {
-                    switch (i) {
-                        case 0:
-                            direction = Direction.UP;
-                            break;
-                        case 1:
-                            direction = Direction.RIGHT;
-                            break;
-                        case 2:
-                            direction = Direction.LEFT;
-                            break;
-                        case 3:
-                            direction = Direction.DOWN;
-                            break;
-                    }
-                    move(direction);
+                    move(indexToDirection(i));
+                    fillCurrentRoomNeighbours();
                     break;
                 }
             }
-        } else {
+        } else if (!unexplored.isEmpty()) {
+            BFSAlgorithm bfsAlgorithm = new BFSAlgorithm();
+            bfsAlgorithm.solve(currentRoom, unexplored).forEach(this::move);
+            checkUnvisitedNeighbours();
+        }
+    }
 
+    private void checkIfNeighboursUnexplored() {
+        for (int i = 0; i < 4; i++) {
+            if (this.currentRoom.getConnections()[i] != null) {
+
+            }
         }
     }
 
     public void move(Direction direction) {
+        int previousRoomDirection = -1;
         switch (direction) {
             case UP:
                 this.currentPosition[1]--;
+                previousRoomDirection = 2;
                 break;
             case RIGHT:
                 this.currentPosition[0]++;
+                previousRoomDirection = 3;
                 break;
             case DOWN:
                 this.currentPosition[1]++;
+                previousRoomDirection = 0;
                 break;
             case LEFT:
                 this.currentPosition[0]--;
+                previousRoomDirection = 1;
                 break;
         }
+        System.out.println(direction);
         this.requestHandler.move(this.uid, this.map, direction);
         this.currentRoom = this.mappedMaze[this.currentPosition[1]][this.currentPosition[0]];
-        this.currentRoom.setVisited(true);
-        fillCurrentRoomNeighbours();
+        if (!this.currentRoom.isVisited()) {
+            int unvisitedCounter = -1;
+            this.currentRoom.setVisited(true);
+            for (int i = 0; i < 4; i++) {
+                if (this.currentRoom.getConnections()[i] != null) {
+                    for (int j = 0; j < 4; j++) {
+                        if (this.currentRoom.getConnections()[i].getConnections()[j] != null) {
+                            unvisitedCounter = 0;
+                            if (!this.currentRoom.getConnections()[i].getConnections()[j].isVisited()) {
+                                unvisitedCounter++;
+                            }
+                        }
+                    }
+                }
+                if (unvisitedCounter == 0) {
+                    unexplored.remove(this.currentRoom.getConnections()[i]);
+                }
+            }
+            checkIfNeighboursUnexplored();
+        }
     }
 
     public void fillCurrentRoomNeighbours() {
@@ -152,7 +190,7 @@ public class Player {
                             this.mappedMaze[this.currentPosition[1]][this.currentPosition[0] - 1] = new Room();
                         }
                         this.mappedMaze[this.currentPosition[1]][this.currentPosition[0] - 1].setConnection(Direction.RIGHT, this.currentRoom);
-                        this.currentRoom.setConnection(Direction.RIGHT, this.mappedMaze[this.currentPosition[1]][this.currentPosition[0] - 1]);
+                        this.currentRoom.setConnection(Direction.LEFT, this.mappedMaze[this.currentPosition[1]][this.currentPosition[0] - 1]);
                         break;
                 }
             }
@@ -168,16 +206,24 @@ public class Player {
     }
 
     public static void main(String[] args) {
-        BFSAlgorithm bfsAlgorithm = new BFSAlgorithm();
-//        Player player = new Player();
-//        player.setMap("1");
-//        player.setUid("bd5f6f92");
-//        player.createEmptyMappedMaze();
-//        player.getStartingPosition();
-//        System.out.println(player.startingPosition[0]);
-//        System.out.println(player.startingPosition[1]);
-//        player.createFirstRoom();
-//        System.out.println();
+        String uid = "bd5f6f92";
+        String mapID = "3";
+        RequestHandler requestHandlerReset = new RequestHandler();
+        requestHandlerReset.reset(uid, mapID);
+        Player player = new Player();
+        player.setMap(mapID);
+        player.setUid(uid);
+        player.createEmptyMappedMaze();
+        player.getStartingPosition();
+        player.createFirstRoom();
+        int i = 1;
+        while (player.unvisitedNeighbours > 0 || !player.unexplored.isEmpty()) {
+            player.calculateNextMove();
+            System.out.println(i);
+            i++;
+        }
+        System.out.println("Liczba krokow: " + requestHandlerReset.moves(uid, mapID)[1]);
+        System.out.println("elo");
     }
 
 }
