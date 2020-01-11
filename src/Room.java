@@ -1,12 +1,7 @@
 public class Room {
     private Room[] connections = new Room[4];
     private boolean visited;
-    int id;
 
-    public Room(int id) {
-        super();
-        this.id = id;
-    }
     public Room() {
         this.visited = false;
     }

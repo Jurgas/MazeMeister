@@ -9,7 +9,7 @@ import java.nio.file.Paths;
 public class RequestHandler {
 
 
-    public Object[] getPoss(String uid, String map) {
+    public Object[] getPossibilities(String uid, String map) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("http://tesla.iem.pw.edu.pl:4444/" + uid + "/" + map + "/possibilities"))
@@ -57,7 +57,7 @@ public class RequestHandler {
         return response(client, request);
     }
 
-    public Object[] startPoss(String uid, String map) {
+    public Object[] startPosition(String uid, String map) {
         HttpClient client = HttpClient.newHttpClient();
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("http://tesla.iem.pw.edu.pl:4444/" + uid + "/" + map + "/startposition"))
@@ -87,20 +87,5 @@ public class RequestHandler {
         }
 
         return new Object[]{response.statusCode(), response.body()};
-    }
-
-
-
-
-    public static void main(String[] args) {
-        RequestHandler r = new RequestHandler();
-        r.reset("bd5f6f92", "2");
-//        r.getPoss("bd5f6f92", "1");
-//        r.move("bd5f6f92", "1", "left");
-//        r.getPoss("bd5f6f92", "1");
-        Object object = r.startPoss("bd5f6f92", "1");
-        Object object1 = r.getPoss("bd5f6f92", "1");
-        System.out.println("hello");
-//        r.reset("bd5f6f92", "1");
     }
 }

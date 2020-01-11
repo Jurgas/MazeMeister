@@ -1,5 +1,6 @@
 import org.json.JSONObject;
 
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 
 
@@ -25,7 +26,7 @@ public class Player {
         return this;
     }
 
-    public void createEmptyMappedMaze() {
+    private void createEmptyMappedMaze() {
         String wymiary = this.requestHandler.size(this.uid, this.map)[1].toString();
         int xPos = 0;
         for (int i = 0; i < wymiary.length(); i++) {
@@ -39,7 +40,7 @@ public class Player {
         this.mappedMaze = new Room[height][width];
     }
 
-    public void checkUnvisitedNeighbours() {
+    private void checkUnvisitedNeighbours() {
         this.unvisitedNeighbours = 0;
         for (int i = 0; i < 4; i++) {
             if (this.currentRoom.getConnections()[i] != null && !this.currentRoom.getConnections()[i].isVisited()) {
@@ -48,8 +49,8 @@ public class Player {
         }
     }
 
-    public void getStartingPosition() {
-        String startingPosition = this.requestHandler.startPoss(this.uid, this.map)[1].toString();
+    private void getStartingPosition() {
+        String startingPosition = this.requestHandler.startPosition(this.uid, this.map)[1].toString();
         int pos = 0;
         for (int i = 0; i < startingPosition.length(); i++) {
             if (startingPosition.charAt(i) == ',') {
@@ -77,7 +78,7 @@ public class Player {
         return null;
     }
 
-    public void calculateNextMove() {
+    private void calculateNextMove() {
         if (this.unvisitedNeighbours > 0) {
             if (this.unvisitedNeighbours > 1) {
                 this.unexplored.add(this.currentRoom);
@@ -97,7 +98,7 @@ public class Player {
         }
     }
 
-    public void move(Direction direction) {
+    private void move(Direction direction) {
         switch (direction) {
             case UP:
                 this.currentPosition[1]--;
@@ -112,13 +113,12 @@ public class Player {
                 this.currentPosition[0]--;
                 break;
         }
-        System.out.println(direction);
         this.requestHandler.move(this.uid, this.map, direction);
         this.currentRoom = this.mappedMaze[this.currentPosition[1]][this.currentPosition[0]];
         this.currentRoom.setVisited(true);
     }
 
-    public int updateUnexploredList() {
+    private int updateUnexploredList() {
         int unvisitedNeighboursCounter;
         for (int i = 0; i < this.unexplored.size(); i++) {
             unvisitedNeighboursCounter = 0;
@@ -135,9 +135,9 @@ public class Player {
         return this.unexplored.size();
     }
 
-    public void fillCurrentRoomNeighbours() {
+    private void fillCurrentRoomNeighbours() {
         String directions[] = new String[4];
-        JSONObject jsonObject = new JSONObject((String) this.requestHandler.getPoss(this.uid, this.map)[1]);
+        JSONObject jsonObject = new JSONObject((String) this.requestHandler.getPossibilities(this.uid, this.map)[1]);
         directions[0] = jsonObject.getString("up");
         directions[1] = jsonObject.getString("right");
         directions[2] = jsonObject.getString("down");
@@ -179,16 +179,14 @@ public class Player {
         checkUnvisitedNeighbours();
     }
 
-    public void createFirstRoom() {
+    private void createFirstRoom() {
         this.mappedMaze[this.startingPosition[1]][this.startingPosition[0]] = new Room();
         this.mappedMaze[this.startingPosition[1]][this.startingPosition[0]].setVisited(true);
         this.currentRoom = this.mappedMaze[this.currentPosition[1]][this.currentPosition[0]];
         fillCurrentRoomNeighbours();
     }
 
-    public static void main(String[] args) {
-        String uid = "bd5f6f92";
-        String mapID = "4";
+    public static void solve(String uid, String mapID) throws FileNotFoundException {
         RequestHandler requestHandlerReset = new RequestHandler();
         requestHandlerReset.reset(uid, mapID);
         Player player = new Player();
@@ -197,15 +195,11 @@ public class Player {
         player.createEmptyMappedMaze();
         player.getStartingPosition();
         player.createFirstRoom();
-        int i = 1;
         while (player.unvisitedNeighbours > 0 || !player.unexplored.isEmpty()) {
             player.calculateNextMove();
-            System.out.println(i);
-            i++;
         }
-        System.out.println("Liczba krokow: " + requestHandlerReset.moves(uid, mapID)[1]);
-        System.out.println("elo");
-        System.out.println(i);
+        Writer writer = new Writer();
+        writer.mapToFile(player.mappedMaze, mapID);
+        requestHandlerReset.upload(uid, mapID, "./mazes/" + mapID + ".txt");
     }
-
 }
