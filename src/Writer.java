@@ -39,7 +39,6 @@ public class Writer {
                 }
             }
         }
-        System.out.println();
         PrintWriter printWriter = new PrintWriter(new File(filePath));
         for (int i = 0; i < height * 2 + 1; i++) {
             for (int j = 0; j < width * 2 + 1; j++) {
