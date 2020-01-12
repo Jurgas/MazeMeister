@@ -27,17 +27,38 @@ public class Player {
     }
 
     private void createEmptyMappedMaze() {
-        String wymiary = this.requestHandler.size(this.uid, this.map)[1].toString();
+        String dimension = this.requestHandler.size(this.uid, this.map)[1].toString();
         int xPos = 0;
-        for (int i = 0; i < wymiary.length(); i++) {
-            if (wymiary.charAt(i) == 'x') {
+        for (int i = 0; i < dimension.length(); i++) {
+            if (dimension.charAt(i) == 'x') {
                 xPos = i;
                 break;
             }
         }
-        int width = Integer.parseInt(wymiary.substring(0, xPos));
-        int height = Integer.parseInt(wymiary.substring(xPos + 1));
+        int width = Integer.parseInt(dimension.substring(0, xPos));
+        int height = Integer.parseInt(dimension.substring(xPos + 1));
         this.mappedMaze = new Room[height][width];
+        for (int i = 0; i < mappedMaze.length; i++) {
+            for (int j = 0; j < mappedMaze[0].length; j++) {
+                mappedMaze[i][j] = new Room();
+            }
+        }
+        fillFrame();
+    }
+
+    private void fillFrame() {
+        for (int i = 0; i < mappedMaze.length; i++) {
+            for (int j = 0; j < mappedMaze[0].length; j++) {
+                if (i == 0)
+                    mappedMaze[i][j].setAnalysedNeighbour(Direction.UP);
+                if (i == mappedMaze.length - 1)
+                    mappedMaze[i][j].setAnalysedNeighbour(Direction.DOWN);
+                if (j == 0)
+                    mappedMaze[i][j].setAnalysedNeighbour(Direction.LEFT);
+                if (j == mappedMaze[0].length - 1)
+                    mappedMaze[i][j].setAnalysedNeighbour(Direction.RIGHT);
+            }
+        }
     }
 
     private void checkUnvisitedNeighbours() {
@@ -115,7 +136,26 @@ public class Player {
         }
         this.requestHandler.move(this.uid, this.map, direction);
         this.currentRoom = this.mappedMaze[this.currentPosition[1]][this.currentPosition[0]];
-        this.currentRoom.setVisited(true);
+        if (!currentRoom.isVisited()) {
+            this.currentRoom.setVisited(true);
+            setAdjacentRooms();
+        }
+    }
+
+    private void setAdjacentRooms() {
+        int currentHeight = this.currentPosition[1];
+        int currentWidth = this.currentPosition[0];
+
+        if (currentHeight < this.mappedMaze.length - 1)
+            this.mappedMaze[currentHeight + 1][currentWidth].setAnalysedNeighbour(Direction.UP);
+        if (currentHeight > 0)
+            this.mappedMaze[currentHeight - 1][currentWidth].setAnalysedNeighbour(Direction.DOWN);
+        if (currentWidth < this.mappedMaze[0].length - 1)
+            this.mappedMaze[currentHeight][currentWidth + 1].setAnalysedNeighbour(Direction.LEFT);
+        if (currentWidth > 0)
+            this.mappedMaze[currentHeight][currentWidth - 1].setAnalysedNeighbour(Direction.RIGHT);
+
+        checkUnvisitedNeighbours();
     }
 
     private int updateUnexploredList() {
@@ -146,30 +186,18 @@ public class Player {
             if (directions[i].equals("0")) {
                 switch (i) {
                     case 0:
-                        if (this.mappedMaze[this.currentPosition[1] - 1][this.currentPosition[0]] == null) {
-                            this.mappedMaze[this.currentPosition[1] - 1][this.currentPosition[0]] = new Room();
-                        }
                         this.mappedMaze[this.currentPosition[1] - 1][this.currentPosition[0]].setConnection(Direction.DOWN, this.currentRoom);
                         this.currentRoom.setConnection(Direction.UP, this.mappedMaze[this.currentPosition[1] - 1][this.currentPosition[0]]);
                         break;
                     case 1:
-                        if (this.mappedMaze[this.currentPosition[1]][this.currentPosition[0] + 1] == null) {
-                            this.mappedMaze[this.currentPosition[1]][this.currentPosition[0] + 1] = new Room();
-                        }
                         this.mappedMaze[this.currentPosition[1]][this.currentPosition[0] + 1].setConnection(Direction.LEFT, this.currentRoom);
                         this.currentRoom.setConnection(Direction.RIGHT, this.mappedMaze[this.currentPosition[1]][this.currentPosition[0] + 1]);
                         break;
                     case 2:
-                        if (this.mappedMaze[this.currentPosition[1] + 1][this.currentPosition[0]] == null) {
-                            this.mappedMaze[this.currentPosition[1] + 1][this.currentPosition[0]] = new Room();
-                        }
                         this.mappedMaze[this.currentPosition[1] + 1][this.currentPosition[0]].setConnection(Direction.UP, this.currentRoom);
                         this.currentRoom.setConnection(Direction.DOWN, this.mappedMaze[this.currentPosition[1] + 1][this.currentPosition[0]]);
                         break;
                     case 3:
-                        if (this.mappedMaze[this.currentPosition[1]][this.currentPosition[0] - 1] == null) {
-                            this.mappedMaze[this.currentPosition[1]][this.currentPosition[0] - 1] = new Room();
-                        }
                         this.mappedMaze[this.currentPosition[1]][this.currentPosition[0] - 1].setConnection(Direction.RIGHT, this.currentRoom);
                         this.currentRoom.setConnection(Direction.LEFT, this.mappedMaze[this.currentPosition[1]][this.currentPosition[0] - 1]);
                         break;
@@ -184,6 +212,7 @@ public class Player {
         this.mappedMaze[this.startingPosition[1]][this.startingPosition[0]].setVisited(true);
         this.currentRoom = this.mappedMaze[this.currentPosition[1]][this.currentPosition[0]];
         fillCurrentRoomNeighbours();
+        setAdjacentRooms();
     }
 
     public static void solve(String uid, String mapID) throws FileNotFoundException {

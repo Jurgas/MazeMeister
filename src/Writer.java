@@ -4,7 +4,6 @@ import java.io.PrintWriter;
 import java.util.Arrays;
 
 public class Writer {
-    private char[][] map;
 
     public void mapToFile(Room[][] mappedMaze, String mapIndex) throws FileNotFoundException {
         String filePath = "./mazes/" + mapIndex + ".txt";
@@ -16,7 +15,7 @@ public class Writer {
         }
         for (int y = 0; y < height; y++) {
             for (int x = 0; x < width; x++) {
-                if (mappedMaze[y][x] != null) {
+                if (mappedMaze[y][x] != null && mappedMaze[y][x].isVisited()) {
                     maze[y * 2 + 1][x * 2 + 1] = '0';
                     for (int i = 0; i < 4; i++) {
                         if (mappedMaze[y][x].getConnections()[i] != null) {

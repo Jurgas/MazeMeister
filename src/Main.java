@@ -2,13 +2,13 @@ import java.io.FileNotFoundException;
 
 public class Main {
     public static void main(String[] args) {
-        String uid = "f46f777f";    //ja
-//        String uid = "bd5f6f92";  //Sebix
+//        String uid = "f46f777f";    //Piotr
+        String uid = "bd5f6f92";  //Sebastian
 
-        Player player = new Player();
-        for (int i = 4; i < 5; i++) {
+        for (int i = 1; i < 5; i++) {
             try {
-                player.solve(uid, Integer.toString(i));
+                Player.solve(uid, Integer.toString(i));
+                System.out.println("Mapa nr " + i + " została rozwiązana.");
             } catch (FileNotFoundException e) {
                 e.printStackTrace();
             }
